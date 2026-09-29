@@ -3,8 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ezdxf
 import csv
-from rocketcea.cea_obj import add_new_fuel
-from rocketcea.cea_obj_w_units import CEA_Obj
 import matplotlib.patches as mpatches
 from geometric_functions import calculate_geometry
  
@@ -247,9 +245,27 @@ card = """
     fuel water H 2.0 O 1.0  wt%=30.0
     h,cal=-68308.  t(k)=298.15 rho,g/cc = 0.9998
     """
-add_new_fuel('IPA70', card)
+
+def CEA_contour_numbers(p_c, r_of, p_e):
+    """Return expansion ratio and ideal C* [m/s] for LOX/IPA70 (pressures in Pa)."""
+    from rocketcea.cea_obj import add_new_fuel
+    from rocketcea.cea_obj_w_units import CEA_Obj
+
+    add_new_fuel('IPA70', card)
+    rcea = CEA_Obj(
+        oxName='LOX', fuelName='IPA70', pressure_units='Pa', cstar_units='m/s',
+    )
+    eps = rcea.get_eps_at_PcOvPe(Pc=p_c, MR=r_of, PcOvPe=p_c / p_e)
+    c_star = rcea.get_Cstar(Pc=p_c, MR=r_of)
+    return eps, c_star
+
 
 def CEA_numbers(p_c,r_of,p_e,mdot):
+    # Only thermochemistry calculations require RocketCEA.
+    from rocketcea.cea_obj import add_new_fuel
+    from rocketcea.cea_obj_w_units import CEA_Obj
+
+    add_new_fuel('IPA70', card)
     rcea = CEA_Obj(oxName = 'LOX',fuelName = 'IPA70',cstar_units='m/s',pressure_units='Pa',temperature_units='K',sonic_velocity_units='m/s',specific_heat_units='kJ/kg-K')
     eps = rcea.get_eps_at_PcOvPe(Pc=p_c,MR=r_of,PcOvPe=p_c/p_e)
     print(f'Expansion Ratio {eps}')
