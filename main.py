@@ -34,6 +34,7 @@ eta_c_star = 0.90 #C* efficiency used for throat sizing
 exit_pressure = 101325 #Pa = 1atm
 ambient_pressure = 101325 #Pa = 1atm
 chamber_pressure = 300*psi_to_pa #Pa
+eta_Isp = 0.95 #Isp (nozzle) efficiency used for performance estimation
 
 #calced CEA params
 CEA = CEA_numbers(chamber_pressure,ofratio,exit_pressure,m_dot)
@@ -42,14 +43,14 @@ c_star_adjusted = eta_c_star * c_star
 L_star = 1.2 #m
 
 ##Design Inputs
-theta_n_deg = 23 #deg from rao tables
-theta_e_deg = 13 #from Rao tables
-contraction_ratio = 9 #free design choice, how stubby you want this bitch
-conv_half_angle_deg = 45 #deg, wall angle between the start of thraot and entry arc
-length_pct = 0.8 #current agreed upon values
-cone_half_angle_deg = 15 #deg
-Ru_over_Rt = 1.5 #how gently the converign section blends to throat
-Rd_over_Rt = 0.382 #curvature post throat, cant realy change this cause Rao said so
+theta_n_deg = 21 #deg from rao tables
+theta_e_deg = 15 #from Rao tables
+contraction_ratio = 5 #free design choice, how stubby vs skinny do we want the throat with const volume
+conv_half_angle_deg = 45 #deg, wall angle between the start of throat and entry arc
+length_pct = 0.8 #Rao percentage - 80% Rao Nozzle
+cone_half_angle_deg = 15 #deg - keep at 15.
+Ru_over_Rt = 1.5 #Upstream throat curve - from Rao
+Rd_over_Rt = 0.382 #downstream throat curve from Rao
 stations_bell = 100 #fidelty of bell
 station_throat_up = 100 #upward section of throat before proper bell
 stations_throat_down = 100 #fidelity downstream of throat
@@ -72,9 +73,10 @@ print(f"CEA ideal vacuum Isp: {vacuum_isp:.2f} s")
 print(f"Sea-level thrust: {sea_level_thrust:.2f} N")
 print(f"Sea-level Isp: {sea_level_isp:.2f} s")
 
-# Delivered estimate: C* efficiency applied to the vacuum thrust (F = Cf*Pc*At with At sized on eta*C*)
-delivered_sea_level_thrust = eta_c_star * vacuum_thrust - area_exit * ambient_pressure
-print(f"Delivered sea-level thrust (C* eff. applied): {delivered_sea_level_thrust:.2f} N")
+#estimated actual thrust with isp efficiency 95%
+estimated_sea_level_thrust = eta_Isp * sea_level_isp * g0 * m_dot
+
+print(f"estimated sea-level thrust (Isp efficiency applied): {estimated_sea_level_thrust:.2f} N")
 
 ##Derived Sizing
 m_dot_fuel = m_dot / (1 + ofratio) #kg/s IPA
@@ -104,7 +106,7 @@ def check(name, value, nominal, tol, unit=""):
 
 print("\n--- REQUIREMENT CHECKS ---")
 check("Sea-level thrust (ideal)", sea_level_thrust, thrust_req, thrust_tol, "N")
-check("Sea-level thrust (delivered)", delivered_sea_level_thrust, thrust_req, thrust_tol, "N")
+check("Sea-level thrust (estimated)", estimated_sea_level_thrust, thrust_req, thrust_tol, "N")
 print(f"  [NOTE] Engine + injector mass <= {max_engine_mass} kg is not evaluated by this script")
 
 #Plot Contour
