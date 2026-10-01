@@ -44,7 +44,7 @@ L_star = 1.2 #m
 
 ##Design Inputs
 theta_n_deg = 21 #deg from rao tables
-theta_e_deg = 15 #from Rao tables
+theta_e_deg = 14 #from Rao tables
 contraction_ratio = 5 #free design choice, how stubby vs skinny do we want the throat with const volume
 conv_half_angle_deg = 45 #deg, wall angle between the start of throat and entry arc
 length_pct = 0.8 #Rao percentage - 80% Rao Nozzle
@@ -95,7 +95,13 @@ print(f"Usable IPA: {m_fuel:.2f} kg   Usable LOX: {m_ox:.2f} kg   ({burn_time} s
 print(f"Injector stiffness: IPA {ipa_inj_stiffness*100:.1f} %   LOX {lox_inj_stiffness*100:.1f} %")
 print(f"Max feed loss (MEOP - inj inlet): IPA {ipa_feed_dp/psi_to_pa:.1f} psi   LOX {lox_feed_dp/psi_to_pa:.1f} psi")
 print(f"Max vehicle liftoff mass for T/W = {vehicle_TW}: {max_vehicle_mass:.1f} kg")
-print(f"Throat dia: {2*Rt*1000:.2f} mm   Exit dia: {2*info['Re']*1000:.2f} mm   Chamber dia: {2*info['Rc']*1000:.2f} mm")
+print("\n--- ENGINE DIMENSIONS ---")
+print(f"Chamber radius: {info['Rc']*1000:.2f} mm")
+print(f"Throat radius: {info['Rt']*1000:.2f} mm")
+print(f"Exit radius: {info['Re']*1000:.2f} mm")
+print(f"Cylinder length: {info['L_c']*1000:.1f} mm")
+print(f"Converging section length: {abs(info['x1'])*1000:.1f} mm")
+print(f"Nozzle length: {info['E'][0]*1000:.1f} mm")
 print(f"Total engine length: {info['total_length']*1000:.1f} mm")
 
 ##Requirement Checks
