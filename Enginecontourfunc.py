@@ -249,21 +249,21 @@ add_new_fuel('IPA70', card)
 
 def CEA_numbers(p_c,r_of,p_e,mdot):
     rcea = CEA_Obj(oxName = 'LOX',fuelName = 'IPA70',cstar_units='m/s',pressure_units='Pa',temperature_units='K',sonic_velocity_units='m/s',specific_heat_units='kJ/kg-K')
-    eps = rcea.get_eps_at_PcOvPe(Pc=p_c,MR=r_of,PcOvPe=p_c/p_e)
+    eps = rcea.get_eps_at_PcOvPe(Pc=p_c,MR=r_of,PcOvPe=p_c/p_e, frozen=1, frozenAtThroat=1)
     print(f'Expansion Ratio {eps}')
-    t_c = rcea.get_Temperatures(Pc=p_c, MR=r_of,eps=eps)[0]
+    t_c = rcea.get_Temperatures(Pc=p_c, MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)[0]
     print(f'Chamber Temp {t_c} K')
     Cp = rcea.get_Chamber_Cp(Pc=p_c, MR=r_of,eps=eps)
     print(f'Specific Heat Chamber {Cp}')
     gamma = rcea.get_Chamber_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps)[1]
-    gamma2 = rcea.get_Throat_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps)[1]
-    MW, gamma3 = rcea.get_exit_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps)
+    gamma2 = rcea.get_Throat_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps, frozen=1)[1]
+    MW, gamma3 = rcea.get_exit_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)
     print(f"gamma throat {gamma2}")
-    ISP = rcea.get_Isp(Pc=p_c, MR=r_of,eps=eps)
+    ISP = rcea.get_Isp(Pc=p_c, MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)
     print(f'ISP normalized {ISP}')
     ISPU = ISP*9.81
     print(f'ISP unnormalized {ISPU}')
-    M_e = rcea.get_MachNumber(Pc=p_c,MR=r_of,eps=eps)
+    M_e = rcea.get_MachNumber(Pc=p_c,MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)
     print(f'Exit Mach {M_e}')
     Thrust = ISPU*mdot
     print(f'Thrust {Thrust} N')
