@@ -28,7 +28,7 @@ vehicle_TW = 1.3 #thrust to weight of the vehicle
 max_engine_mass = 20 #kg, engine + injector - not checked by this script
 
 ##Sizing Params
-m_dot = 2 #kg/s
+m_dot = 2.2 #kg/s
 ofratio = 1.3
 eta_c_star = 0.90 #C* efficiency used for throat sizing
 exit_pressure = 101325 #Pa = 1atm
