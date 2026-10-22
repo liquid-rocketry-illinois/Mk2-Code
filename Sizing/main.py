@@ -34,8 +34,10 @@ eta_c_star = 0.90 #C* efficiency used for throat sizing
 exit_pressure = 101325 #Pa = 1atm
 expansion_ratio = None #Ae/At - None = expand to exit_pressure, or set a number to override
 ambient_pressure = 101325 #Pa = 1atm
-inj_stiffness = 0.2 #nominal (inj inlet - Pc)/Pc
-chamber_pressure = ipa_inj_inlet_pressure / (1 + inj_stiffness) #Pa, set by inlet pressure and stiffness
+min_inj_stiffness = 0.15 #worst-case (inj inlet - Pc)/Pc, at low inlet pressure and high Pc
+#Pa, nominal Pc chosen so the worst-case tolerance envelope still hits min_inj_stiffness
+chamber_pressure = (min(ipa_inj_inlet_pressure, lox_inj_inlet_pressure) - inj_inlet_pressure_tol) / (1 + min_inj_stiffness) - chamber_pressure_tol
+inj_stiffness = ipa_inj_inlet_pressure / chamber_pressure - 1 #resulting nominal stiffness
 eta_Isp = 0.95 #Isp (nozzle) efficiency used for performance estimation
 
 #calced CEA params
@@ -94,7 +96,10 @@ max_vehicle_mass = thrust_req / (vehicle_TW * g0) #kg, liftoff mass at nominal t
 print("\n--- DERIVED SIZING ---")
 print(f"IPA mdot: {m_dot_fuel:.3f} kg/s   LOX mdot: {m_dot_ox:.3f} kg/s")
 print(f"Usable IPA: {m_fuel:.2f} kg   Usable LOX: {m_ox:.2f} kg   ({burn_time} s burn)")
+print(f"Chamber pressure: {chamber_pressure/psi_to_pa:.1f} psi")
 print(f"Injector stiffness: IPA {ipa_inj_stiffness*100:.1f} %   LOX {lox_inj_stiffness*100:.1f} %")
+worst_inj_stiffness = (min(ipa_inj_inlet_pressure, lox_inj_inlet_pressure) - inj_inlet_pressure_tol) / (chamber_pressure + chamber_pressure_tol) - 1
+print(f"Worst-case injector stiffness (inlet -{inj_inlet_pressure_tol/psi_to_pa:.0f} psi, Pc +{chamber_pressure_tol/psi_to_pa:.0f} psi): {worst_inj_stiffness*100:.1f} %")
 print(f"Max feed loss (MEOP - inj inlet): IPA {ipa_feed_dp/psi_to_pa:.1f} psi   LOX {lox_feed_dp/psi_to_pa:.1f} psi")
 print(f"Max vehicle liftoff mass for T/W = {vehicle_TW}: {max_vehicle_mass:.1f} kg")
 print("\n--- ENGINE DIMENSIONS ---")
