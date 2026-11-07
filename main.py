@@ -33,8 +33,8 @@ ofratio = 1.3
 eta_c_star = 0.90 #C* efficiency used for throat sizing
 exit_pressure = 101325 #Pa = 1atm
 ambient_pressure = 101325 #Pa = 1atm
-chamber_pressure = 300*psi_to_pa #Pa
-eta_Isp = 0.95 #Isp (nozzle) efficiency used for performance estimation
+chamber_pressure = 395*psi_to_pa #Pa
+eta_Isp = 0.97 #Isp (nozzle) efficiency used for performance estimation - ~0.97 for 100% Rao, ~0.95 for 80% Rao
 
 #calced CEA params
 CEA = CEA_numbers(chamber_pressure,ofratio,exit_pressure,m_dot)
@@ -45,7 +45,9 @@ L_star = 1.2 #m
 ##Design Inputs
 theta_n_deg = 21 #deg from rao tables
 theta_e_deg = 14 #from Rao tables
-contraction_ratio = 5 #free design choice, how stubby vs skinny do we want the throat with const volume
+chamber_sizing_mode = "chamber_diameter" #choose "contraction_ratio" or "chamber_diameter"
+contraction_ratio = 5 #chamber area / throat area; input only in contraction_ratio mode
+chamber_diameter = .0762 #m (0.1016 = 101.6 mm); input only in chamber_diameter mode
 conv_half_angle_deg = 45 #deg, wall angle between the start of throat and entry arc
 length_pct = 0.8 #Rao percentage - 80% Rao Nozzle
 cone_half_angle_deg = 15 #deg - keep at 15.
@@ -57,6 +59,18 @@ stations_throat_down = 100 #fidelity downstream of throat
 
 ##Calc Contour
 area_throat, Rt = throat_goat(m_dot, c_star_adjusted, chamber_pressure)
+
+# Resolve the unused sizing value from the selected input and the sized throat.
+if chamber_sizing_mode == "contraction_ratio":
+    if not np.isfinite(contraction_ratio) or contraction_ratio <= 1:
+        raise ValueError("contraction_ratio must be finite and greater than 1.")
+    chamber_diameter = 2 * Rt * np.sqrt(contraction_ratio)
+elif chamber_sizing_mode == "chamber_diameter":
+    if not np.isfinite(chamber_diameter) or chamber_diameter <= 2 * Rt:
+        raise ValueError("chamber_diameter must be finite and greater than the throat diameter (in meters).")
+    contraction_ratio = (chamber_diameter / (2 * Rt))**2
+else:
+    raise ValueError('chamber_sizing_mode must be "contraction_ratio" or "chamber_diameter".')
 
 x,y,info = full_engine_contour(Rt, eps, theta_n_deg,theta_e_deg, contraction_ratio, L_star, conv_half_angle_deg, length_pct, cone_half_angle_deg, Ru_over_Rt, Rd_over_Rt, stations_bell, station_throat_up, stations_throat_down)
 
@@ -96,6 +110,8 @@ print(f"Injector stiffness: IPA {ipa_inj_stiffness*100:.1f} %   LOX {lox_inj_sti
 print(f"Max feed loss (MEOP - inj inlet): IPA {ipa_feed_dp/psi_to_pa:.1f} psi   LOX {lox_feed_dp/psi_to_pa:.1f} psi")
 print(f"Max vehicle liftoff mass for T/W = {vehicle_TW}: {max_vehicle_mass:.1f} kg")
 print("\n--- ENGINE DIMENSIONS ---")
+print(f"Chamber diameter: {chamber_diameter*1000:.2f} mm")
+print(f"Contraction ratio: {contraction_ratio:.3f}")
 print(f"Chamber radius: {info['Rc']*1000:.2f} mm")
 print(f"Throat radius: {info['Rt']*1000:.2f} mm")
 print(f"Exit radius: {info['Re']*1000:.2f} mm")
