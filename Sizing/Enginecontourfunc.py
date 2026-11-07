@@ -247,12 +247,17 @@ card = """
     """
 add_new_fuel('IPA70', card)
 
-def CEA_numbers(p_c,r_of,p_e,mdot):
+def CEA_numbers(p_c,r_of,p_e,mdot,eps=None):
     rcea = CEA_Obj(oxName = 'LOX',fuelName = 'IPA70',cstar_units='m/s',pressure_units='Pa',temperature_units='K',sonic_velocity_units='m/s',specific_heat_units='kJ/kg-K')
-    eps = rcea.get_eps_at_PcOvPe(Pc=p_c,MR=r_of,PcOvPe=p_c/p_e, frozen=1, frozenAtThroat=1)
+    if eps is None: #expand to p_e, otherwise use the given expansion ratio
+        eps = rcea.get_eps_at_PcOvPe(Pc=p_c,MR=r_of,PcOvPe=p_c/p_e, frozen=1, frozenAtThroat=1)
     print(f'Expansion Ratio {eps}')
-    t_c = rcea.get_Temperatures(Pc=p_c, MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)[0]
+    P_exit = p_c/rcea.get_PcOvPe(Pc=p_c, MR=r_of, eps=eps, frozen=1, frozenAtThroat=1)
+    print(f'Exit Pressure {P_exit:.0f} Pa')
+    t_c, t_t, t_e = rcea.get_Temperatures(Pc=p_c, MR=r_of,eps=eps, frozen=1, frozenAtThroat=1)
     print(f'Chamber Temp {t_c} K')
+    print(f'Throat Temp {t_t} K')
+    print(f'Exit Temp {t_e} K')
     Cp = rcea.get_Chamber_Cp(Pc=p_c, MR=r_of,eps=eps)
     print(f'Specific Heat Chamber {Cp}')
     gamma = rcea.get_Chamber_MolWt_gamma(Pc=p_c, MR=r_of,eps=eps)[1]
@@ -272,4 +277,4 @@ def CEA_numbers(p_c,r_of,p_e,mdot):
     MW_chamber = rcea.get_Chamber_MolWt_gamma(Pc=p_c, MR=r_of, eps=eps)[0]
     print(f'MW Chamber {MW_chamber} lbm/lbmole')
 
-    return([eps,t_c,Cp,gamma,gamma2,gamma3,ISPU,ISP,M_e,Thrust,cstar,MW_chamber])
+    return([eps,t_c,Cp,gamma,gamma2,gamma3,ISPU,ISP,M_e,Thrust,cstar,MW_chamber,t_e])

@@ -29,27 +29,28 @@ max_engine_mass = 20 #kg, engine + injector - not checked by this script
 
 ##Sizing Params
 m_dot = 2.2 #kg/s
-ofratio = 1.3
+ofratio = 1.36
 eta_c_star = 0.90 #C* efficiency used for throat sizing
 exit_pressure = 101325 #Pa = 1atm
+expansion_ratio = None #Ae/At - None = expand to exit_pressure, or set a number to override
 ambient_pressure = 101325 #Pa = 1atm
 chamber_pressure = 395*psi_to_pa #Pa
 eta_Isp = 0.97 #Isp (nozzle) efficiency used for performance estimation - ~0.97 for 100% Rao, ~0.95 for 80% Rao
 
 #calced CEA params
-CEA = CEA_numbers(chamber_pressure,ofratio,exit_pressure,m_dot)
-[eps,chamber_temp,cp,gamma,gamma2,gamma3,ISPU,ISP,exit_mach,Thrust,c_star,MW_chamber] = CEA
+CEA = CEA_numbers(chamber_pressure,ofratio,exit_pressure,m_dot,expansion_ratio)
+[eps,chamber_temp,cp,gamma,gamma2,gamma3,ISPU,ISP,exit_mach,Thrust,c_star,MW_chamber,exit_temp] = CEA
 c_star_adjusted = eta_c_star * c_star
 L_star = 1.2 #m
 
 ##Design Inputs
-theta_n_deg = 21 #deg from rao tables
-theta_e_deg = 14 #from Rao tables
+theta_n_deg = 19 #deg from rao tables (100% bell, eps ~3.65)
+theta_e_deg = 9 #from Rao tables (100% bell, eps ~3.65)
 chamber_sizing_mode = "chamber_diameter" #choose "contraction_ratio" or "chamber_diameter"
 contraction_ratio = 5 #chamber area / throat area; input only in contraction_ratio mode
-chamber_diameter = .0762 #m (0.1016 = 101.6 mm); input only in chamber_diameter mode
+chamber_diameter = .0762 #m (0.0762 = 76.2 mm); input only in chamber_diameter mode
 conv_half_angle_deg = 45 #deg, wall angle between the start of throat and entry arc
-length_pct = 0.8 #Rao percentage - 80% Rao Nozzle
+length_pct = 1.0 #Rao percentage - 100% Rao Nozzle
 cone_half_angle_deg = 15 #deg - keep at 15.
 Ru_over_Rt = 1.5 #Upstream throat curve - from Rao
 Rd_over_Rt = 0.382 #downstream throat curve from Rao
@@ -106,7 +107,10 @@ max_vehicle_mass = thrust_req / (vehicle_TW * g0) #kg, liftoff mass at nominal t
 print("\n--- DERIVED SIZING ---")
 print(f"IPA mdot: {m_dot_fuel:.3f} kg/s   LOX mdot: {m_dot_ox:.3f} kg/s")
 print(f"Usable IPA: {m_fuel:.2f} kg   Usable LOX: {m_ox:.2f} kg   ({burn_time} s burn)")
+print(f"Chamber pressure: {chamber_pressure/psi_to_pa:.1f} psi")
 print(f"Injector stiffness: IPA {ipa_inj_stiffness*100:.1f} %   LOX {lox_inj_stiffness*100:.1f} %")
+worst_inj_stiffness = (min(ipa_inj_inlet_pressure, lox_inj_inlet_pressure) - inj_inlet_pressure_tol) / (chamber_pressure + chamber_pressure_tol) - 1
+print(f"Worst-case injector stiffness (inlet -{inj_inlet_pressure_tol/psi_to_pa:.0f} psi, Pc +{chamber_pressure_tol/psi_to_pa:.0f} psi): {worst_inj_stiffness*100:.1f} %")
 print(f"Max feed loss (MEOP - inj inlet): IPA {ipa_feed_dp/psi_to_pa:.1f} psi   LOX {lox_feed_dp/psi_to_pa:.1f} psi")
 print(f"Max vehicle liftoff mass for T/W = {vehicle_TW}: {max_vehicle_mass:.1f} kg")
 print("\n--- ENGINE DIMENSIONS ---")
