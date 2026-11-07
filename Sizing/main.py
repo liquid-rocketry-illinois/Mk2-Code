@@ -48,7 +48,7 @@ theta_n_deg = 19 #deg from rao tables (100% bell, eps ~3.65)
 theta_e_deg = 9 #from Rao tables (100% bell, eps ~3.65)
 chamber_sizing_mode = "chamber_diameter" #choose "contraction_ratio" or "chamber_diameter"
 contraction_ratio = 5 #chamber area / throat area; input only in contraction_ratio mode
-chamber_diameter = .0762 #m (0.0762 = 76.2 mm); input only in chamber_diameter mode
+chamber_diameter = .0889 #m (0.0889 = 88.9 mm); input only in chamber_diameter mode
 conv_half_angle_deg = 45 #deg, wall angle between the start of throat and entry arc
 length_pct = 1.0 #Rao percentage - 100% Rao Nozzle
 cone_half_angle_deg = 15 #deg - keep at 15.
